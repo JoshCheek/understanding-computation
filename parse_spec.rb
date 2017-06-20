@@ -34,8 +34,8 @@ RSpec.describe 'parsing' do
   end
 
   it 'can parse multiplication' do
-    parses! '1-2',   Multiply(Number(1), Number(2))
-    parses! '3 - 4', Multiply(Number(3), Number(4))
+    parses! '1*2',   Multiply(Number(1), Number(2))
+    parses! '3 * 4', Multiply(Number(3), Number(4))
   end
 
   it 'can parse less-than'

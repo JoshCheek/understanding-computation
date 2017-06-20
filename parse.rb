@@ -2,13 +2,61 @@ require_relative 'simple'
 
 module Simple
   def parse(str)
-    token = str
-    case token
-    when /^\d+$/
-      Number token.to_i
+    tokens, unparsed = tokenize(str)
+    if unparsed.empty?
+      parse_tokens *tokens
     else
-      Variable token.intern
+      require "pry"
+      binding.pry
     end
+  end
+
+  private def parse_tokens(*tokens)
+    if tokens.length == 0
+      require "pry"
+      binding.pry
+    end
+
+    if tokens.length == 1
+      case token = tokens.first
+      when /^\d+$/
+        Number token.to_i
+      else
+        Variable token.intern
+      end
+    elsif tokens.length == 3
+      first, second, third = tokens
+      case second
+      when "+"
+        Add parse_tokens(first), parse_tokens(third)
+      when "-"
+        Sub parse_tokens(first), parse_tokens(third)
+      when "*"
+        Multiply parse_tokens(first), parse_tokens(third)
+      else
+        require "pry"
+        binding.pry
+      end
+    else
+      require "pry"
+      binding.pry
+    end
+  end
+
+  private def tokenize(str)
+    tokens = []
+    loop do
+      case str
+      when /^\s+/
+        # noop
+      when /^\d+/, /^\w[\w0-9]*/, /[-+*]/
+        tokens << $&
+      else
+        break
+      end
+      str = str.sub $&, ""
+    end
+    return tokens, str
   end
 end
 
