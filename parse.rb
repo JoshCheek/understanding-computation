@@ -27,29 +27,11 @@ module Simple
       first, second, *rest = tokens
       case second
       when "+"
-        rhs = parse_tokens(rest)
-        case rhs
-        when Add, Sub
-          rhs.class.new Add(parse_tokens([first]), rhs.lhs), rhs.rhs
-        else
-          Add parse_tokens([first]), rhs
-        end
+        Add(parse_tokens([first]), parse_tokens(rest)).reassoc
       when "-"
-        rhs = parse_tokens(rest)
-        case rhs
-        when Add, Sub
-          rhs.class.new Sub(parse_tokens([first]), rhs.lhs), rhs.rhs
-        else
-          Sub parse_tokens([first]), rhs
-        end
+        Sub(parse_tokens([first]), parse_tokens(rest)).reassoc
       when "*"
-        rhs = parse_tokens(rest)
-        case rhs
-        when Mul
-          Mul Mul(parse_tokens([first]), rhs.lhs), rhs.rhs
-        else
-          Mul parse_tokens([first]), rhs
-        end
+        Mul(parse_tokens([first]), parse_tokens(rest)).reassoc
 
       when "<"
         LessThan parse_tokens([first]), parse_tokens(rest)

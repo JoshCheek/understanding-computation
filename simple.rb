@@ -12,7 +12,7 @@ module Simple
       alias inspect to_s
     end
 
-    klass.module_eval(block) if block
+    klass.module_eval(&block) if block
     const_set name, klass
     define_method(name) { |*args| klass.new(*args) }
     klass
@@ -25,9 +25,68 @@ module Simple
   Struct :If, :condition, :consequent, :alternate
   Struct :While, :condition, :body
 
-  Struct :Add, :lhs, :rhs
-  Struct :Sub, :lhs, :rhs
-  Struct :Mul, :lhs, :rhs
+  module BinaryOp
+    def self.included(klass)
+      class << klass
+        attr_accessor :precedence
+      end
+    end
+
+    def precedence
+      self.class.precedence
+    end
+
+    def reassoc
+      return self unless rhs.respond_to? :precedence
+      if precedence == rhs.precedence
+        rhs.binop_flip self
+      else
+        self
+      end
+    end
+
+    protected def binop_flip(parent)
+      if rhs.respond_to? :precedence
+        flipped = rhs.binop_flip self
+      else
+        flipped = self
+      end
+      flipped.push_down_lhs(parent)
+    end
+
+    protected def push_down_lhs(parent)
+      if lhs.respond_to? :precedence
+        self.class.new(
+          lhs.push_down_lhs(parent),
+          rhs
+        )
+      else
+        self.class.new(
+          parent.class.new(
+            parent.lhs,
+            lhs
+          ),
+          rhs
+        )
+      end
+    end
+  end
+
+  Struct :Add, :lhs, :rhs do
+    include BinaryOp
+    self.precedence = 1
+  end
+
+  Struct :Sub, :lhs, :rhs do
+    include BinaryOp
+    self.precedence = 1
+  end
+
+  Struct :Mul, :lhs, :rhs do
+    include BinaryOp
+    self.precedence = 2
+  end
+
   Struct :LessThan, :lhs, :rhs
   Struct :GreaterThan, :lhs, :rhs
 end
