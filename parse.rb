@@ -4,17 +4,24 @@ module Simple
   def parse(str)
     tokens, unparsed = tokenize(str)
     raise "Not fully tokenized: #{unparsed.inspect}" if unparsed.length > 0
-    ast, unparsed = parse_tokens tokens
-    raise "Not fully parsed: #{unparsed.inspect}" if unparsed.length > 0
-    ast
+    asts = []
+    loop do
+      break if tokens.empty?
+      ast, tokens = parse_tokens tokens
+      asts << ast
+    end
+    case asts.length
+    when 0
+      require "pry"
+      binding.pry
+    when 1
+      asts[0]
+    else
+      asts.reduce { |first, second| Sequence first, second }
+    end
   end
 
   private def parse_tokens(tokens)
-    if tokens.length == 0
-      require "pry"
-      binding.pry
-    end
-
     first, second, *rest = tokens
 
     case second

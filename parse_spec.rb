@@ -114,29 +114,27 @@ RSpec.describe 'parsing' do
     parses! "1\n + 2", Add(Num(1), Num(2))
   end
 
-  xit 'can parse sequences' do
+  it 'can parse sequences' do
     parses! "1\n2", Sequence(Num(1), Num(2))
-    parses! "a\nb\nc", Sequence(Var(:a), Var(:b), Var(:c))
+    parses! "a\nb\nc", Sequence(Sequence(Var(:a), Var(:b)), Var(:c))
   end
 
-  xit 'can parse all that shit' do
-    expected = Sequence(
-      Assign(:x, Mul(Var(:x), Num(2))),
+  it 'can parse all that shit' do
+    expected =
       Sequence(
-        Assign(:y, Add(Var(:y), Num(15))),
         Sequence(
-          If(LessThan(Var(:x), Var(:y)),
-             Assign(:z, Add(Var(:x), Var(:y))),
-             Assign(:z, Sub(Var(:x), Var(:y)))),
           Sequence(
-            Assign(:i, Num(0)),
-            While(
-              GreaterThan(Num(5), Var(:i)),
-              Assign(:i, Add(Var(:i), Num(1))))
-          )
-        )
-      )
-    )
+            Sequence(
+              Assign(:x, Mul(Var(:x), Num(2))),
+              Assign(:y, Add(Var(:y), Num(15)))),
+            If(LessThan(Var(:x), Var(:y)),
+               Assign(:z, Add(Var(:x), Var(:y))),
+               Assign(:z, Sub(Var(:x), Var(:y))))),
+          Assign(:i, Num(0))),
+        While(
+          GreaterThan(Num(5), Var(:i)),
+          Assign(:i, Add(Var(:i), Num(1)))))
+
     expect(parse <<-SIMPLE).to eq expected
     x = x * 2
     y = y + 15
