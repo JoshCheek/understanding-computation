@@ -3,6 +3,11 @@ module Simple
 
   private def Struct(name, *attrs, &block)
     klass = ::Struct.new(*attrs) do
+      def with(overrides)
+        overrides.each_with_object(dup) do |(k, v), struct|
+          struct[k] = v
+        end
+      end
       def class_name
         self.class.name.to_s.sub(/^Simple::/, "")
       end
@@ -38,37 +43,20 @@ module Simple
 
     def reassoc
       return self unless rhs.respond_to? :precedence
-      if precedence >= rhs.precedence
-        rhs.reassoc.binop_flip self
+      if precedence < rhs.precedence
+        with rhs: rhs.reassoc
       else
-        self.class.new(lhs, rhs.reassoc)
+        rhs.reassoc.bubble_down self
       end
     end
 
-    protected def binop_flip(parent)
-      (rhs.respond_to?(:precedence) &&
-         rhs.precedence >= precedence ?
-        rhs.binop_flip(self)        :
-        self
-      ).push_down_lhs(parent)
-    end
-
-    protected def push_down_lhs(parent)
-      if precedence > parent.precedence
-        parent.class.new(
-          parent.lhs,
-          self
-        )
+    protected def bubble_down(parent)
+      if parent.precedence < precedence
+        parent.with rhs: self
       elsif lhs.respond_to? :precedence
-        self.class.new(
-          lhs.push_down_lhs(parent),
-          rhs
-        )
+        with lhs: lhs.bubble_down(parent)
       else
-        self.class.new(
-          parent.class.new(parent.lhs, lhs),
-          rhs
-        )
+        with lhs: parent.with(rhs: lhs)
       end
     end
   end
