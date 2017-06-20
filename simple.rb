@@ -4,9 +4,7 @@ module Simple
   private def Struct(name, *attrs, &block)
     klass = ::Struct.new(*attrs) do
       def with(overrides)
-        overrides.each_with_object(dup) do |(k, v), struct|
-          struct[k] = v
-        end
+        overrides.each_with_object(dup) { |(k, v), struct| struct[k] = v }
       end
       def class_name
         self.class.name.to_s.sub(/^Simple::/, "")
@@ -17,9 +15,9 @@ module Simple
       alias inspect to_s
     end
 
-    klass.module_eval(&block) if block
+    klass.module_eval &block if block
     const_set name, klass
-    define_method(name) { |*args| klass.new(*args) }
+    define_method name, &klass.method(:new)
     klass
   end
 
@@ -32,9 +30,7 @@ module Simple
 
   module BinaryOp
     def self.included(klass)
-      klass.singleton_class.class_eval do
-        attr_accessor :precedence
-      end
+      klass.singleton_class.class_eval { attr_accessor :precedence }
     end
 
     def precedence
@@ -42,8 +38,9 @@ module Simple
     end
 
     def reassoc
-      return self unless rhs.respond_to? :precedence
-      if precedence < rhs.precedence
+      if !rhs.respond_to? :precedence
+        self
+      elsif precedence < rhs.precedence
         with rhs: rhs.reassoc
       else
         rhs.reassoc.bubble_down self

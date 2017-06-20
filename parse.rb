@@ -5,84 +5,65 @@ module Simple
     tokens, unparsed = tokenize(str)
     raise "Not fully tokenized: #{unparsed.inspect}" if unparsed.length > 0
     asts = []
-    loop do
-      break if tokens.empty?
-      ast, next_tokens = parse_tokens tokens
-      raise "Unparsed tokens! #{tokens.inspect}" if next_tokens == tokens
+    while tokens.any?
+      ast, tokens = parse_tokens(old_tokens = tokens)
+      raise "Unparsed tokens! #{tokens.inspect}" if old_tokens == tokens
       asts << ast
-      tokens = next_tokens
     end
     case asts.length
-    when 0
-      raise "Haven't figured out what to do with empty programs"
-    when 1
-      asts[0]
-    else
-      asts.reduce { |first, second| Sequence first, second }
+    when 0 then raise "Haven't figured out what to do with empty programs"
+    when 1 then asts[0]
+    else asts.reduce { |first, second| Sequence first, second }
     end
   end
 
   private def parse_tokens(tokens)
     first, second, *rest = tokens
 
-    case second
-    when "="
+    if "=" == second
       rhs, tokens = parse_tokens(rest)
       return Assign(first.intern, rhs), tokens
-    when "+"
+    end
+
+    binops = {
+      "+" => {class: Add, reassoc: true},
+      "-" => {class: Sub, reassoc: true},
+      "*" => {class: Mul, reassoc: true},
+      "<" => {class: LessThan},
+      ">" => {class: GreaterThan},
+    }
+
+    if op = binops[second]
       lhs, tokens = parse_tokens([first])
       raise "Invalid LHS" unless tokens.empty?
       rhs, tokens = parse_tokens(rest)
-      return Add(lhs, rhs).reassoc, tokens
-    when "-"
-      lhs, tokens = parse_tokens([first])
-      raise "Invalid LHS" unless tokens.empty?
-      rhs, tokens = parse_tokens(rest)
-      return Sub(lhs, rhs).reassoc, tokens
-    when "*"
-      lhs, tokens = parse_tokens([first])
-      raise "Invalid LHS" unless tokens.empty?
-      rhs, tokens = parse_tokens(rest)
-      return Mul(lhs, rhs).reassoc, tokens
-    when "<"
-      lhs, tokens = parse_tokens([first])
-      raise "Invalid LHS" unless tokens.empty?
-      rhs, tokens = parse_tokens(rest)
-      return LessThan(lhs, rhs), tokens
-    when ">"
-      lhs, tokens = parse_tokens([first])
-      raise "Invalid LHS" unless tokens.empty?
-      rhs, tokens = parse_tokens(rest)
-      return GreaterThan(lhs, rhs), tokens
+      instance = op[:class].new lhs, rhs
+      instance = instance.reassoc if op[:reassoc]
+      return instance, tokens
     end
 
     if "if" == first
       # This might be a good place to introduce parser combinators?
-      raise "Not a left paren: #{second.inspect}" unless "(" == second
-      condition, tokens = parse_tokens rest
-      rparen, lbrace, *tokens = tokens
+      raise "Not a left paren: #{second.inspect}"  unless "(" == second
+      condition, (rparen, lbrace, *tokens) = parse_tokens rest
       raise "Not a right paren: #{rparen.inspect}" unless ")" == rparen
-      raise "Not an lbrace: #{lbrace.inspect}" unless "{" == lbrace
-      consequent, tokens = parse_tokens tokens
-      rbrace, kw_else, lbrace, *tokens = tokens
-      raise "Not an rbrace: #{rbrace.inspect}" unless "}" == rbrace
-      raise "Not an else kw: #{kw_else.inspect}" unless "else" == kw_else
-      raise "Not an lbrace: #{lbrace.inspect}" unless "{" == lbrace
-      alternate, tokens = parse_tokens tokens
-      rbrace, *tokens = tokens
-      raise "Not an rbrace: #{rbrace.inspect}" unless "}" == rbrace
+      raise "Not an lbrace: #{lbrace.inspect}"     unless "{" == lbrace
+      consequent, (rbrace, kw_else, lbrace, *tokens) = parse_tokens tokens
+      raise "Not an rbrace: #{rbrace.inspect}"     unless "}" == rbrace
+      raise "Not an else kw: #{kw_else.inspect}"   unless "else" == kw_else
+      raise "Not an lbrace: #{lbrace.inspect}"     unless "{" == lbrace
+      alternate, (rbrace, *tokens) = parse_tokens tokens
+      raise "Not an rbrace: #{rbrace.inspect}"     unless "}" == rbrace
       return If(condition, consequent, alternate), tokens
     end
 
     if "while" == first
-      raise "Not a left paren: #{second.inspect}" unless "(" == second
-      condition, tokens = parse_tokens rest
-      rparen, lbrace, *tokens = tokens
+      raise "Not a left paren: #{second.inspect}"  unless "(" == second
+      condition, (rparen, lbrace, *tokens) = parse_tokens rest
       raise "Not a right paren: #{rparen.inspect}" unless ")" == rparen
-      raise "Not an lbrace: #{lbrace.inspect}" unless "{" == lbrace
-      body, tokens = parse_tokens tokens
-      rbrace, *tokens = tokens
-      raise "Not an rbrace: #{rbrace.inspect}" unless "}" == rbrace
+      raise "Not an lbrace: #{lbrace.inspect}"     unless "{" == lbrace
+      body, (rbrace, *tokens) = parse_tokens tokens
+      raise "Not an rbrace: #{rbrace.inspect}"     unless "}" == rbrace
       return While(condition, body), tokens
     end
 
@@ -101,15 +82,15 @@ module Simple
     loop do
       case str
       when /\A\s+/
-        # noop
+        str = $'
       when /\A\d+/,
            /\A\w[\w0-9]*/,
            /\A[-+*<>=(){}]/
         tokens << $&
+        str = $'
       else
         break
       end
-      str = $'
     end
     return tokens, str
   end
