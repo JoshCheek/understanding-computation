@@ -38,8 +38,16 @@ RSpec.describe 'parsing' do
     parses! '3 * 4', Multiply(Number(3), Number(4))
   end
 
-  it 'can parse less-than'
-  it 'can parse greater-than'
+  it 'can parse less-than' do
+    parses! '1<2',   LessThan(Number(1), Number(2))
+    parses! '3 < 4', LessThan(Number(3), Number(4))
+  end
+
+  it 'can parse greater-than' do
+    parses! '1>2',   GreaterThan(Number(1), Number(2))
+    parses! '3 > 4', GreaterThan(Number(3), Number(4))
+  end
+
   it 'can parse assignment'
   it 'can parse if-statements'
   it 'can parse while-statements'

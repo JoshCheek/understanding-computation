@@ -3,12 +3,8 @@ require_relative 'simple'
 module Simple
   def parse(str)
     tokens, unparsed = tokenize(str)
-    if unparsed.empty?
-      parse_tokens *tokens
-    else
-      require "pry"
-      binding.pry
-    end
+    return parse_tokens *tokens if unparsed.empty?
+    raise "Not fully parsed: #{unparsed.inspect}"
   end
 
   private def parse_tokens(*tokens)
@@ -33,9 +29,12 @@ module Simple
         Sub parse_tokens(first), parse_tokens(third)
       when "*"
         Multiply parse_tokens(first), parse_tokens(third)
+      when "<"
+        LessThan parse_tokens(first), parse_tokens(third)
+      when ">"
+        GreaterThan parse_tokens(first), parse_tokens(third)
       else
-        require "pry"
-        binding.pry
+        raise "Missing binary op? #{tokens.inspect}"
       end
     else
       require "pry"
@@ -49,7 +48,7 @@ module Simple
       case str
       when /^\s+/
         # noop
-      when /^\d+/, /^\w[\w0-9]*/, /[-+*]/
+      when /^\d+/, /^\w[\w0-9]*/, /[-+*<>]/
         tokens << $&
       else
         break
