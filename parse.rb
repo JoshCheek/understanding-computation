@@ -7,13 +7,14 @@ module Simple
     asts = []
     loop do
       break if tokens.empty?
-      ast, tokens = parse_tokens tokens
+      ast, next_tokens = parse_tokens tokens
+      raise "Unparsed tokens! #{tokens.inspect}" if next_tokens == tokens
       asts << ast
+      tokens = next_tokens
     end
     case asts.length
     when 0
-      require "pry"
-      binding.pry
+      raise "Haven't figured out what to do with empty programs"
     when 1
       asts[0]
     else
@@ -91,8 +92,8 @@ module Simple
     when /^\w/
       return Var(first.intern), tokens.drop(1)
     end
-    raise "Tokens: #{tokens.inspect}"
 
+    raise "Unparsed tokens: #{tokens.inspect}"
   end
 
   private def tokenize(str)
@@ -113,13 +114,3 @@ module Simple
     return tokens, str
   end
 end
-
-__END__
-if(x < y) {
-  z = x + y
-} else {
-  z = x - y
-}
-while(5 > i) {
-  i = i + 1
-}
