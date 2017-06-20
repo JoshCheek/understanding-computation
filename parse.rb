@@ -16,9 +16,9 @@ module Simple
     if tokens.length == 1
       case token = tokens.first
       when /^\d+$/
-        Number token.to_i
+        Num token.to_i
       else
-        Variable token.intern
+        Var token.intern
       end
     elsif 3 <= tokens.length
       first, second, *rest = tokens
@@ -28,7 +28,7 @@ module Simple
       when "-"
         Sub parse_tokens([first]), parse_tokens(rest)
       when "*"
-        Multiply parse_tokens([first]), parse_tokens(rest)
+        Mul parse_tokens([first]), parse_tokens(rest)
       when "<"
         LessThan parse_tokens([first]), parse_tokens(rest)
       when ">"

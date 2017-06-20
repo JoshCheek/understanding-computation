@@ -12,48 +12,66 @@ RSpec.describe 'parsing' do
   end
 
   it 'can parse numbers' do
-    parses! '1', Number(1)
-    parses! '1234567890', Number(1234567890)
+    parses! '1', Num(1)
+    parses! '1234567890', Num(1234567890)
   end
 
   it 'can parse variables' do
-    parses! 'x', Variable(:x)
-    parses! 'abcdefghijklmnopqrstuvwxyz', Variable(:abcdefghijklmnopqrstuvwxyz)
-    parses! 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', Variable(:ABCDEFGHIJKLMNOPQRSTUVWXYZ)
-    parses! 'a1', Variable(:a1)
+    parses! 'x', Var(:x)
+    parses! 'abcdefghijklmnopqrstuvwxyz', Var(:abcdefghijklmnopqrstuvwxyz)
+    parses! 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', Var(:ABCDEFGHIJKLMNOPQRSTUVWXYZ)
+    parses! 'a1', Var(:a1)
   end
 
   it 'can parse addition' do
-    parses! '1+2',   Add(Number(1), Number(2))
-    parses! '3 + 4', Add(Number(3), Number(4))
+    parses! '1+2',   Add(Num(1), Num(2))
+    parses! '3 + 4', Add(Num(3), Num(4))
   end
 
   it 'can parse subtraction' do
-    parses! '1-2',   Sub(Number(1), Number(2))
-    parses! '3 - 4', Sub(Number(3), Number(4))
+    parses! '1-2',   Sub(Num(1), Num(2))
+    parses! '3 - 4', Sub(Num(3), Num(4))
   end
 
   it 'can parse multiplication' do
-    parses! '1*2',   Multiply(Number(1), Number(2))
-    parses! '3 * 4', Multiply(Number(3), Number(4))
+    parses! '1*2',   Mul(Num(1), Num(2))
+    parses! '3 * 4', Mul(Num(3), Num(4))
   end
 
   it 'can parse less-than' do
-    parses! '1<2',   LessThan(Number(1), Number(2))
-    parses! '3 < 4', LessThan(Number(3), Number(4))
+    parses! '1<2',   LessThan(Num(1), Num(2))
+    parses! '3 < 4', LessThan(Num(3), Num(4))
   end
 
   it 'can parse greater-than' do
-    parses! '1>2',   GreaterThan(Number(1), Number(2))
-    parses! '3 > 4', GreaterThan(Number(3), Number(4))
+    parses! '1>2',   GreaterThan(Num(1), Num(2))
+    parses! '3 > 4', GreaterThan(Num(3), Num(4))
   end
 
   it 'can parse assignment' do
-    parses! 'a = 1', Assign(:a, Number(1))
-    parses! 'a = 1+5', Assign(:a, Add(Number(1), Number(5)))
+    parses! 'a = 1', Assign(:a, Num(1))
+    parses! 'a = 1+5', Assign(:a, Add(Num(1), Num(5)))
   end
 
-  it 'can parse nested structures'
+  xit 'can parse nested structures' do
+    parses! '1 + 2 + 3', Add(Add(Num(1), Num(2)), Num(3))
+    parses! '1 - 2 - 3', Sub(Sub(Num(1), Num(2)), Num(3))
+    parses! '1 * 2 * 3', Mul(Mul(Num(1), Num(2)), Num(3))
+  end
+
+  xit 'gives multiplication higher precedence than addition and subtraction' do
+    parses! '1 + 2 * 3', Add(Num(1), Mul(Num(2), Num(3)))
+    parses! '1 * 2 + 3', Add(Mul(Num(1), Num(2)), Num(3))
+    parses! '1 - 2 * 3', Sub(Num(1), Mul(Num(2), Num(3)))
+    parses! '1 * 2 - 3', Sub(Mul(Num(1), Num(2)), Num(3))
+    parses! '1 + 2 * 3 - 4',
+      Sub(Add(Num(1), Mul(Num(2), Num(3))), Num(4))
+    parses! '1*2 - 3*4 + 5*6', Add(
+                                 Sub(
+                                   Mul(Num(1), Num(2)),
+                                   Mul(Num(3), Num(4))),
+                                 Mul(Num(5), Num(6)))
+  end
 
   it 'can parse if-statements'
   it 'can parse while-statements'
@@ -61,18 +79,18 @@ RSpec.describe 'parsing' do
 
   it 'can parse all that shit' do
     expected = Sequence(
-      Assign(:x, Multiply(Variable(:x), Number(2))),
+      Assign(:x, Mul(Var(:x), Num(2))),
       Sequence(
-        Assign(:y, Add(Variable(:y), Number(15))),
+        Assign(:y, Add(Var(:y), Num(15))),
         Sequence(
-          If(LessThan(Variable(:x), Variable(:y)),
-             Assign(:z, Add(Variable(:x), Variable(:y))),
-             Assign(:z, Sub(Variable(:x), Variable(:y)))),
+          If(LessThan(Var(:x), Var(:y)),
+             Assign(:z, Add(Var(:x), Var(:y))),
+             Assign(:z, Sub(Var(:x), Var(:y)))),
           Sequence(
-            Assign(:i, Number(0)),
+            Assign(:i, Num(0)),
             While(
-              GreaterThan(Number(5), Variable(:i)),
-              Assign(:i, Add(Variable(:i), Number(1))))
+              GreaterThan(Num(5), Var(:i)),
+              Assign(:i, Add(Var(:i), Num(1))))
           )
         )
       )

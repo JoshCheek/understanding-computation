@@ -18,8 +18,8 @@ module Simple
     klass
   end
 
-  Struct :Number, :value
-  Struct :Variable, :name
+  Struct :Num, :value
+  Struct :Var, :name
   Struct :Assign, :name, :value
   Struct :Sequence, :first, :second
   Struct :If, :condition, :consequent, :alternate
@@ -27,7 +27,7 @@ module Simple
 
   Struct :Add, :lhs, :rhs
   Struct :Sub, :lhs, :rhs
-  Struct :Multiply, :lhs, :rhs
+  Struct :Mul, :lhs, :rhs
   Struct :LessThan, :lhs, :rhs
   Struct :GreaterThan, :lhs, :rhs
 end
