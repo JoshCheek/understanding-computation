@@ -84,9 +84,31 @@ RSpec.describe 'parsing' do
                                  Mul(Num(5), Num(6)))
   end
 
-  it 'can parse if-statements'
+  it 'can parse if-statements' do
+    parses! "if( 1<2 ) { 3 } else { 4 }", If(
+      LessThan(Num(1), Num(2)),
+      Num(3),
+      Num(4),
+    )
+    parses! "if(1<2){3}else{4}", If(
+      LessThan(Num(1), Num(2)),
+      Num(3),
+      Num(4),
+    )
+    parses! "if\n(\n1\n<\n2\n)\n{\n3\n}\nelse\n{\n4\n}\n", If(
+      LessThan(Num(1), Num(2)),
+      Num(3),
+      Num(4),
+    )
+  end
+
   it 'can parse while-statements'
   it 'can parse sequences'
+
+  it 'can parse across lines' do
+    parses! "1 + \n2", Add(Num(1), Num(2))
+    parses! "1\n + 2", Add(Num(1), Num(2))
+  end
 
   xit 'can parse all that shit' do
     expected = Sequence(
