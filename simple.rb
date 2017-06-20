@@ -38,23 +38,38 @@ module Simple
 
     def reassoc
       return self unless rhs.respond_to? :precedence
-      return self unless precedence == rhs.precedence
-      rhs.binop_flip self
+      if precedence >= rhs.precedence
+        rhs.reassoc.binop_flip self
+      else
+        self.class.new(lhs, rhs.reassoc)
+      end
     end
 
     protected def binop_flip(parent)
-      (rhs.respond_to?(:precedence) ?
+      (rhs.respond_to?(:precedence) &&
+         rhs.precedence >= precedence ?
         rhs.binop_flip(self)        :
         self
       ).push_down_lhs(parent)
     end
 
     protected def push_down_lhs(parent)
-      self.class.new \
-        lhs.respond_to?(:precedence) ?
-          lhs.push_down_lhs(parent)  :
+      if precedence > parent.precedence
+        parent.class.new(
+          parent.lhs,
+          self
+        )
+      elsif lhs.respond_to? :precedence
+        self.class.new(
+          lhs.push_down_lhs(parent),
+          rhs
+        )
+      else
+        self.class.new(
           parent.class.new(parent.lhs, lhs),
-        rhs
+          rhs
+        )
+      end
     end
   end
 

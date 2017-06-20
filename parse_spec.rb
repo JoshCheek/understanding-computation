@@ -70,7 +70,7 @@ RSpec.describe 'parsing' do
     parses! '1 + 2 - 3 + 4', Add(Sub(Add(Num(1), Num(2)), Num(3)), Num(4))
   end
 
-  xit 'gives multiplication higher precedence than addition and subtraction' do
+  it 'gives multiplication higher precedence than addition and subtraction' do
     parses! '1 + 2 * 3', Add(Num(1), Mul(Num(2), Num(3)))
     parses! '1 * 2 + 3', Add(Mul(Num(1), Num(2)), Num(3))
     parses! '1 - 2 * 3', Sub(Num(1), Mul(Num(2), Num(3)))
