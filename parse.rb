@@ -66,6 +66,18 @@ module Simple
       return If(condition, consequent, alternate), tokens
     end
 
+    if "while" == first
+      raise "Not a left paren: #{second.inspect}" unless "(" == second
+      condition, tokens = parse_tokens rest
+      rparen, lbrace, *tokens = tokens
+      raise "Not a right paren: #{rparen.inspect}" unless ")" == rparen
+      raise "Not an lbrace: #{lbrace.inspect}" unless "{" == lbrace
+      body, tokens = parse_tokens tokens
+      rbrace, *tokens = tokens
+      raise "Not an rbrace: #{rbrace.inspect}" unless "}" == rbrace
+      return While(condition, body), tokens
+    end
+
     case first
     when /^\d+$/
       return Num(first.to_i), tokens.drop(1)

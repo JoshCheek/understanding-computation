@@ -102,12 +102,21 @@ RSpec.describe 'parsing' do
     )
   end
 
-  it 'can parse while-statements'
-  it 'can parse sequences'
+  it 'can parse while-statements' do
+    parses! "while( i < 5 ) { i = i + 1 }", While(
+      LessThan(Var(:i), Num(5)),
+      Assign(:i, Add(Var(:i), Num(1)))
+    )
+  end
 
   it 'can parse across lines' do
     parses! "1 + \n2", Add(Num(1), Num(2))
     parses! "1\n + 2", Add(Num(1), Num(2))
+  end
+
+  xit 'can parse sequences' do
+    parses! "1\n2", Sequence(Num(1), Num(2))
+    parses! "a\nb\nc", Sequence(Var(:a), Var(:b), Var(:c))
   end
 
   xit 'can parse all that shit' do
