@@ -3,11 +3,11 @@ require_relative 'simple'
 module Simple
   def parse(str)
     tokens, unparsed = tokenize(str)
-    return parse_tokens *tokens if unparsed.empty?
+    return parse_tokens tokens if unparsed.empty?
     raise "Not fully parsed: #{unparsed.inspect}"
   end
 
-  private def parse_tokens(*tokens)
+  private def parse_tokens(tokens)
     if tokens.length == 0
       require "pry"
       binding.pry
@@ -20,19 +20,21 @@ module Simple
       else
         Variable token.intern
       end
-    elsif tokens.length == 3
-      first, second, third = tokens
+    elsif 3 <= tokens.length
+      first, second, *rest = tokens
       case second
       when "+"
-        Add parse_tokens(first), parse_tokens(third)
+        Add parse_tokens([first]), parse_tokens(rest)
       when "-"
-        Sub parse_tokens(first), parse_tokens(third)
+        Sub parse_tokens([first]), parse_tokens(rest)
       when "*"
-        Multiply parse_tokens(first), parse_tokens(third)
+        Multiply parse_tokens([first]), parse_tokens(rest)
       when "<"
-        LessThan parse_tokens(first), parse_tokens(third)
+        LessThan parse_tokens([first]), parse_tokens(rest)
       when ">"
-        GreaterThan parse_tokens(first), parse_tokens(third)
+        GreaterThan parse_tokens([first]), parse_tokens(rest)
+      when "="
+        Assign first.intern, parse_tokens(rest)
       else
         raise "Missing binary op? #{tokens.inspect}"
       end
@@ -46,14 +48,14 @@ module Simple
     tokens = []
     loop do
       case str
-      when /^\s+/
+      when /\A\s+/
         # noop
-      when /^\d+/, /^\w[\w0-9]*/, /[-+*<>]/
+      when /\A\d+/, /\A\w[\w0-9]*/, /\A[-+*<>=]/
         tokens << $&
       else
         break
       end
-      str = str.sub $&, ""
+      str = $'
     end
     return tokens, str
   end

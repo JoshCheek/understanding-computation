@@ -48,7 +48,13 @@ RSpec.describe 'parsing' do
     parses! '3 > 4', GreaterThan(Number(3), Number(4))
   end
 
-  it 'can parse assignment'
+  it 'can parse assignment' do
+    parses! 'a = 1', Assign(:a, Number(1))
+    parses! 'a = 1+5', Assign(:a, Add(Number(1), Number(5)))
+  end
+
+  it 'can parse nested structures'
+
   it 'can parse if-statements'
   it 'can parse while-statements'
   it 'can parse sequences'
