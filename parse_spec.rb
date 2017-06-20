@@ -2,6 +2,7 @@ require_relative 'parse'
 
 RSpec.configure do |config|
   config.fail_fast = true
+  config.formatter = 'documentation'
 end
 
 RSpec.describe 'parsing' do
@@ -87,7 +88,7 @@ RSpec.describe 'parsing' do
   it 'can parse while-statements'
   it 'can parse sequences'
 
-  it 'can parse all that shit' do
+  xit 'can parse all that shit' do
     expected = Sequence(
       Assign(:x, Mul(Var(:x), Num(2))),
       Sequence(
