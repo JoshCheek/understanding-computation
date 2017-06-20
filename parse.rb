@@ -20,15 +20,37 @@ module Simple
       else
         Var token.intern
       end
-    elsif 3 <= tokens.length
+    elsif tokens.length == 2
+      require "pry"
+      binding.pry
+    else
       first, second, *rest = tokens
       case second
       when "+"
-        Add parse_tokens([first]), parse_tokens(rest)
+        rhs = parse_tokens(rest)
+        case rhs
+        when Add, Sub
+          rhs.class.new Add(parse_tokens([first]), rhs.lhs), rhs.rhs
+        else
+          Add parse_tokens([first]), rhs
+        end
       when "-"
-        Sub parse_tokens([first]), parse_tokens(rest)
+        rhs = parse_tokens(rest)
+        case rhs
+        when Add, Sub
+          rhs.class.new Sub(parse_tokens([first]), rhs.lhs), rhs.rhs
+        else
+          Sub parse_tokens([first]), rhs
+        end
       when "*"
-        Mul parse_tokens([first]), parse_tokens(rest)
+        rhs = parse_tokens(rest)
+        case rhs
+        when Mul
+          Mul Mul(parse_tokens([first]), rhs.lhs), rhs.rhs
+        else
+          Mul parse_tokens([first]), rhs
+        end
+
       when "<"
         LessThan parse_tokens([first]), parse_tokens(rest)
       when ">"
@@ -38,9 +60,6 @@ module Simple
       else
         raise "Missing binary op? #{tokens.inspect}"
       end
-    else
-      require "pry"
-      binding.pry
     end
   end
 

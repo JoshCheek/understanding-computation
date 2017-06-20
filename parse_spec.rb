@@ -8,7 +8,10 @@ RSpec.describe 'parsing' do
   include Simple
 
   def parses!(to_parse, expected_ast)
-    expect(parse to_parse).to eq expected_ast
+    expect(parse to_parse).to eq(expected_ast)
+  rescue RSpec::Expectations::ExpectationNotMetError => e
+    e.set_backtrace caller.drop(1)
+    raise
   end
 
   it 'can parse numbers' do
@@ -53,10 +56,15 @@ RSpec.describe 'parsing' do
     parses! 'a = 1+5', Assign(:a, Add(Num(1), Num(5)))
   end
 
-  xit 'can parse nested structures' do
+  it 'can parse nested structures' do
     parses! '1 + 2 + 3', Add(Add(Num(1), Num(2)), Num(3))
     parses! '1 - 2 - 3', Sub(Sub(Num(1), Num(2)), Num(3))
     parses! '1 * 2 * 3', Mul(Mul(Num(1), Num(2)), Num(3))
+  end
+
+  it 'gives addition and subtraction the same precedence' do
+    parses! '1 + 2 - 3', Sub(Add(Num(1), Num(2)), Num(3))
+    parses! '1 - 2 + 3', Add(Sub(Num(1), Num(2)), Num(3))
   end
 
   xit 'gives multiplication higher precedence than addition and subtraction' do
