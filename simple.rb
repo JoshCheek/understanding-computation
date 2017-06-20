@@ -32,7 +32,7 @@ module Simple
 
   module BinaryOp
     def self.included(klass)
-      class << klass
+      klass.singleton_class.class_eval do
         attr_accessor :precedence
       end
     end

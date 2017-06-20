@@ -23,22 +23,22 @@ module Simple
     elsif tokens.length == 2
       require "pry"
       binding.pry
+    elsif "=" == tokens[1]
+      Assign tokens[0].intern, parse_tokens(tokens.drop 2)
     else
       first, second, *rest = tokens
+      lhs_ast, rhs_ast = parse_tokens([first]), parse_tokens(rest)
       case second
       when "+"
-        Add(parse_tokens([first]), parse_tokens(rest)).reassoc
+        Add(lhs_ast, rhs_ast).reassoc
       when "-"
-        Sub(parse_tokens([first]), parse_tokens(rest)).reassoc
+        Sub(lhs_ast, rhs_ast).reassoc
       when "*"
-        Mul(parse_tokens([first]), parse_tokens(rest)).reassoc
-
+        Mul(lhs_ast, rhs_ast).reassoc
       when "<"
-        LessThan parse_tokens([first]), parse_tokens(rest)
+        LessThan lhs_ast, rhs_ast
       when ">"
-        GreaterThan parse_tokens([first]), parse_tokens(rest)
-      when "="
-        Assign first.intern, parse_tokens(rest)
+        GreaterThan lhs_ast, rhs_ast
       else
         raise "Missing binary op? #{tokens.inspect}"
       end
