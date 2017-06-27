@@ -2,7 +2,7 @@ grammar PatternGrammar
   rule program
     expr:pattern {
       def to_ast
-        Pattern::Top.new expr.to_ast
+        Pattern::Ast::Top.new expr.to_ast
       end
     }
   end
@@ -17,7 +17,7 @@ grammar PatternGrammar
       right:(nondeterministic_expr / deterministic_expr)
     ) {
       def to_ast
-        Pattern::Either.new(left.to_ast, right.to_ast)
+        Pattern::Ast::Either.new(left.to_ast, right.to_ast)
       end
     }
   end
@@ -27,7 +27,7 @@ grammar PatternGrammar
       rest:deterministic_expr
     ) {
       def to_ast
-        Pattern::Sequence.new(
+        Pattern::Ast::Sequence.new(
           first.to_ast,
           rest.to_ast,
         )
@@ -62,7 +62,7 @@ grammar PatternGrammar
   rule zero_or_more
     '*' {
       def to_ast(modifyee)
-        Pattern::ZeroOrMore.new(modifyee)
+        Pattern::Ast::ZeroOrMore.new(modifyee)
       end
     }
   end
@@ -70,7 +70,7 @@ grammar PatternGrammar
   rule one_or_more
     '+' {
       def to_ast(modifyee)
-        Pattern::OneOrMore.new(modifyee)
+        Pattern::Ast::OneOrMore.new(modifyee)
       end
     }
   end
@@ -78,7 +78,7 @@ grammar PatternGrammar
   rule optional
     '?' {
       def to_ast(modifyee)
-        Pattern::Optional.new(modifyee)
+        Pattern::Ast::Optional.new(modifyee)
       end
     }
   end
@@ -86,7 +86,7 @@ grammar PatternGrammar
   rule group
     '(' pattern ')' {
       def to_ast
-        Pattern::Group.new pattern.to_ast
+        Pattern::Ast::Group.new pattern.to_ast
       end
     }
   end
@@ -100,7 +100,7 @@ grammar PatternGrammar
       escaped:("[" / "]" / [abefnrtv(){}])
     ) {
       def to_ast
-        Pattern::ExactMatch.new(
+        Pattern::Ast::ExactMatch.new(
           case escaped.text_value
           when ?a then 7.chr
           when ?b then 8.chr
@@ -123,7 +123,7 @@ grammar PatternGrammar
   rule char
     [a-zA-Z0-9] {
       def to_ast
-        Pattern::ExactMatch.new(text_value)
+        Pattern::Ast::ExactMatch.new(text_value)
       end
     }
   end

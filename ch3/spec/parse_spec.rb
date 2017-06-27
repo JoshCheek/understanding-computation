@@ -5,13 +5,12 @@ RSpec.configure do |config|
   config.formatter = 'documentation'
 end
 
-module Pattern
+module Pattern::Ast
   RSpec.describe 'Pattern.parse' do
-    include Pattern
 
     def parses!(str, expected)
       actual = Pattern.parse(str)
-      expect(actual).to eq Pattern::Top.new(expected)
+      expect(actual).to eq Top.new(expected)
     end
 
     specify 'empty string -> EOS' do
