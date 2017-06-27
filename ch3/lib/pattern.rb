@@ -3,10 +3,18 @@ require 'treetop'
 
 Treetop.load_from_string <<~GRAMMAR
 grammar PatternGrammar
+  rule program
+    expr:pattern {
+      def to_ast
+        Pattern::Top.new expr.to_ast
+      end
+    }
+  end
+
   rule pattern
     expr:(nondeterministic_expr / deterministic_expr) {
       def to_ast
-        Pattern::Top.new expr.to_ast
+        expr.to_ast
       end
     }
   end
@@ -20,6 +28,15 @@ grammar PatternGrammar
   end
 
   rule deterministic_expr
+    (first:group rest:deterministic_expr) {
+      def to_ast
+        Pattern::Sequence.new(
+          first.to_ast,
+          rest.to_ast
+        )
+      end
+    }
+    /
     (first:modified_expr rest:deterministic_expr) {
       def to_ast
         Pattern::Sequence.new(
@@ -38,15 +55,17 @@ grammar PatternGrammar
       end
     }
     /
-    expr:modified_expr {
-      def to_ast
-        expr.to_ast
-      end
-    }
+    group
     /
-    expr:unmodified_expr {
+    modified_expr
+    /
+    unmodified_expr
+  end
+
+  rule group
+    '(' pattern ')' {
       def to_ast
-        expr.to_ast
+        Pattern::Group.new pattern.to_ast
       end
     }
   end
@@ -151,6 +170,12 @@ module Pattern
   class Either < Struct.new(:left, :right)
     def tree_inspect
       "Either.new(#{left.tree_inspect}, #{right.tree_inspect})"
+    end
+  end
+
+  class Group < Struct.new(:subexpr)
+    def tree_inspect
+      "Group.new(#{subexpr.tree_inspect})"
     end
   end
 end

@@ -37,8 +37,6 @@ module Pattern
       )
     end
 
-    specify 'parens -> Group'
-
     specify 'asterisks to ZeroOrMore of whatever is to the left' do
       parses! 'a*', ZeroOrMore.new(ExactMatch.new("a"))
     end
@@ -81,6 +79,25 @@ module Pattern
       parses! "(a)", Group.new(ExactMatch.new("a"))
     end
 
+    specify 'parens can be in sequences' do
+      parses! "a(b)", Sequence.new(
+        ExactMatch.new("a"),
+        Group.new(ExactMatch.new("b")),
+      )
+      parses! "(a)b", Sequence.new(
+        Group.new(ExactMatch.new("a")),
+        ExactMatch.new("b"),
+      )
+      parses! "(a)(b)", Sequence.new(
+        Group.new(ExactMatch.new("a")),
+        Group.new(ExactMatch.new("b")),
+      )
+    end
+
+    specify 'parens can be nested' do
+      parses! "((a))", Group.new(Group.new(ExactMatch.new("a")))
+    end
+
     specify 'parens bind tighter than sequenes' do
       parses! "a(bc)d", Sequence.new(
         ExactMatch.new("a"),
@@ -94,20 +111,22 @@ module Pattern
           ExactMatch.new("d"),
         )
       )
-      parses! 'a(b|c)*d', Sequence.new(
-        ExactMatch.new("a"),
-        Sequence.new(
-          ZeroOrMore.new(
-            Group.new(
-              Either.new(
-                ExactMatch.new("b"),
-                ExactMatch.new("c"),
-              )
-            )
-          ),
-          ExactMatch.new("d"),
-        )
-      )
     end
+
+
+      # parses! 'a(b|c)*d', Sequence.new(
+      #   ExactMatch.new("a"),
+      #   Sequence.new(
+      #     ZeroOrMore.new(
+      #       Group.new(
+      #         Either.new(
+      #           ExactMatch.new("b"),
+      #           ExactMatch.new("c"),
+      #         )
+      #       )
+      #     ),
+      #     ExactMatch.new("d"),
+      #   )
+      # )
   end
 end
