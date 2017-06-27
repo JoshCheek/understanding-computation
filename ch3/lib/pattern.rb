@@ -28,15 +28,6 @@ grammar PatternGrammar
   end
 
   rule deterministic_expr
-    (first:group rest:deterministic_expr) {
-      def to_ast
-        Pattern::Sequence.new(
-          first.to_ast,
-          rest.to_ast
-        )
-      end
-    }
-    /
     (first:modified_expr rest:deterministic_expr) {
       def to_ast
         Pattern::Sequence.new(
@@ -55,19 +46,9 @@ grammar PatternGrammar
       end
     }
     /
-    group
-    /
     modified_expr
     /
     unmodified_expr
-  end
-
-  rule group
-    '(' pattern ')' {
-      def to_ast
-        Pattern::Group.new pattern.to_ast
-      end
-    }
   end
 
   rule modified_expr
@@ -83,7 +64,8 @@ grammar PatternGrammar
       def to_ast
         char.to_ast
       end
-    }
+    } /
+    group
   end
 
   rule modifier
@@ -106,6 +88,14 @@ grammar PatternGrammar
     [a-zA-Z0-9] {
       def to_ast
         Pattern::ExactMatch.new(text_value)
+      end
+    }
+  end
+
+  rule group
+    '(' pattern ')' {
+      def to_ast
+        Pattern::Group.new pattern.to_ast
       end
     }
   end

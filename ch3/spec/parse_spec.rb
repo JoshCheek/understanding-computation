@@ -44,7 +44,15 @@ module Pattern
     specify 'asterisks bind higher than sequences' do
       parses! 'ab*', Sequence.new(
         ExactMatch.new("a"),
-        ZeroOrMore.new(ExactMatch.new("b"))
+        ZeroOrMore.new(ExactMatch.new("b")),
+      )
+      parses! 'a*b', Sequence.new(
+        ZeroOrMore.new(ExactMatch.new("a")),
+        ExactMatch.new("b"),
+      )
+      parses! 'a*b*', Sequence.new(
+        ZeroOrMore.new(ExactMatch.new("a")),
+        ZeroOrMore.new(ExactMatch.new("b")),
       )
     end
 
@@ -79,7 +87,7 @@ module Pattern
       parses! "(a)", Group.new(ExactMatch.new("a"))
     end
 
-    specify 'parens can be in sequences' do
+    specify 'groups can be in sequences' do
       parses! "a(b)", Sequence.new(
         ExactMatch.new("a"),
         Group.new(ExactMatch.new("b")),
@@ -94,8 +102,16 @@ module Pattern
       )
     end
 
-    specify 'parens can be nested' do
+    specify 'groups can be nested' do
       parses! "((a))", Group.new(Group.new(ExactMatch.new("a")))
+    end
+
+    specify 'modifiers can apply to groups' do
+      parses! "(a)*", ZeroOrMore.new(Group.new(ExactMatch.new("a")))
+    end
+
+    specify 'modifiers apply within groups' do
+      parses! "(a*)", Group.new(ZeroOrMore.new(ExactMatch.new("a")))
     end
 
     specify 'parens bind tighter than sequenes' do
@@ -113,20 +129,21 @@ module Pattern
       )
     end
 
-
-      # parses! 'a(b|c)*d', Sequence.new(
-      #   ExactMatch.new("a"),
-      #   Sequence.new(
-      #     ZeroOrMore.new(
-      #       Group.new(
-      #         Either.new(
-      #           ExactMatch.new("b"),
-      #           ExactMatch.new("c"),
-      #         )
-      #       )
-      #     ),
-      #     ExactMatch.new("d"),
-      #   )
-      # )
+    specify 'can deal with this kinda complex thing' do
+      parses! 'a(b|c)*d', Sequence.new(
+        ExactMatch.new("a"),
+        Sequence.new(
+          ZeroOrMore.new(
+            Group.new(
+              Either.new(
+                ExactMatch.new("b"),
+                ExactMatch.new("c"),
+              )
+            )
+          ),
+          ExactMatch.new("d"),
+        )
+      )
+    end
   end
 end
