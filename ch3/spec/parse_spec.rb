@@ -62,10 +62,22 @@ module Pattern
       parses! 'a+', OneOrMore.new(ExactMatch.new('a'))
     end
 
+    specify 'question marks to Optional of whatever is to the left' do
+      parses! 'a?', Optional.new(ExactMatch.new('a'))
+    end
+
     specify 'modifiers bind higher than sequences' do
       parses! 'ab*', Sequence.new(
         ExactMatch.new("a"),
         ZeroOrMore.new(ExactMatch.new("b")),
+      )
+      parses! 'ab+', Sequence.new(
+        ExactMatch.new("a"),
+        OneOrMore.new(ExactMatch.new("b")),
+      )
+      parses! 'ab?', Sequence.new(
+        ExactMatch.new("a"),
+        Optional.new(ExactMatch.new("b")),
       )
       parses! 'a*b', Sequence.new(
         ZeroOrMore.new(ExactMatch.new("a")),
@@ -75,9 +87,9 @@ module Pattern
         ZeroOrMore.new(ExactMatch.new("a")),
         ZeroOrMore.new(ExactMatch.new("b")),
       )
-      parses! 'a+b+', Sequence.new(
-        OneOrMore.new(ExactMatch.new("a")),
-        OneOrMore.new(ExactMatch.new("b")),
+      parses! 'a?b?', Sequence.new(
+        Optional.new(ExactMatch.new("a")),
+        Optional.new(ExactMatch.new("b")),
       )
     end
 
