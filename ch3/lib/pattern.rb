@@ -56,7 +56,7 @@ grammar PatternGrammar
   end
 
   rule modifier
-    zom:zero_or_more {
+    zom:(zero_or_more / one_or_more) {
       def to_ast(modifyee)
         zom.to_ast(modifyee)
       end
@@ -67,6 +67,14 @@ grammar PatternGrammar
     '*' {
       def to_ast(modifyee)
         Pattern::ZeroOrMore.new(modifyee)
+      end
+    }
+  end
+
+  rule one_or_more
+    '+' {
+      def to_ast(modifyee)
+        Pattern::OneOrMore.new(modifyee)
       end
     }
   end
@@ -169,6 +177,12 @@ module Pattern
   end
 
   class ZeroOrMore < Struct.new(:expr)
+    def tree_inspect
+      "ZeroOrMore.new(#{expr.tree_inspect})"
+    end
+  end
+
+  class OneOrMore < Struct.new(:expr)
     def tree_inspect
       "ZeroOrMore.new(#{expr.tree_inspect})"
     end

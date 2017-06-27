@@ -58,7 +58,11 @@ module Pattern
       parses! 'a*', ZeroOrMore.new(ExactMatch.new("a"))
     end
 
-    specify 'asterisks bind higher than sequences' do
+    specify 'plusses to OneOrMore of whatever is to the left' do
+      parses! 'a+', OneOrMore.new(ExactMatch.new('a'))
+    end
+
+    specify 'modifiers bind higher than sequences' do
       parses! 'ab*', Sequence.new(
         ExactMatch.new("a"),
         ZeroOrMore.new(ExactMatch.new("b")),
@@ -70,6 +74,10 @@ module Pattern
       parses! 'a*b*', Sequence.new(
         ZeroOrMore.new(ExactMatch.new("a")),
         ZeroOrMore.new(ExactMatch.new("b")),
+      )
+      parses! 'a+b+', Sequence.new(
+        OneOrMore.new(ExactMatch.new("a")),
+        OneOrMore.new(ExactMatch.new("b")),
       )
     end
 
