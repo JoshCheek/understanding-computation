@@ -1,13 +1,11 @@
 require 'treetop'
 require 'pattern/ast'
 
-module Pattern
+class Pattern
   require 'pattern/grammar'
   Parser = PatternGrammarParser
 
-  extend self
-
-  def parse(str)
+  def self.parse(str)
     return Ast::Top.new Ast::Eos.new if str.empty?
     grammar = Parser.new
     if tree = grammar.parse(str)

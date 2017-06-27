@@ -1,9 +1,5 @@
 require 'pattern'
-RSpec.configure do |config|
-  config.color     = true
-  config.fail_fast = true
-  config.formatter = 'documentation'
-end
+require 'spec_helper'
 
 module Pattern::Ast
   RSpec.describe 'Pattern.parse' do

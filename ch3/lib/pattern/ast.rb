@@ -1,4 +1,4 @@
-module Pattern
+class Pattern
   module Ast
     class Top < Struct.new(:pattern)
       def inspect
