@@ -130,18 +130,39 @@ module Pattern
     end
 
     specify 'can deal with this kinda complex thing' do
-      parses! 'a(b|c)*d', Sequence.new(
+      parses! 'a(b|c*)*d', Sequence.new(
         ExactMatch.new("a"),
         Sequence.new(
           ZeroOrMore.new(
             Group.new(
               Either.new(
                 ExactMatch.new("b"),
-                ExactMatch.new("c"),
+                ZeroOrMore.new(ExactMatch.new("c")),
               )
             )
           ),
           ExactMatch.new("d"),
+        )
+      )
+    end
+
+    specify 'can deal with this other kinda complex thing' do
+      parses! 'ab(c*d|ef)', Sequence.new(
+        ExactMatch.new("a"),
+        Sequence.new(
+          ExactMatch.new("b"),
+          Group.new(
+            Either.new(
+              Sequence.new(
+                ZeroOrMore.new(ExactMatch.new("c")),
+                ExactMatch.new("d"),
+              ),
+              Sequence.new(
+                ExactMatch.new("e"),
+                ExactMatch.new("f"),
+              )
+            )
+          )
         )
       )
     end

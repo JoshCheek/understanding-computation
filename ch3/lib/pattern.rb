@@ -12,15 +12,14 @@ grammar PatternGrammar
   end
 
   rule pattern
-    expr:(nondeterministic_expr / deterministic_expr) {
-      def to_ast
-        expr.to_ast
-      end
-    }
+    nondeterministic_expr / deterministic_expr
   end
 
   rule nondeterministic_expr
-    (left:deterministic_expr '|' right:(nondeterministic_expr / deterministic_expr)) {
+    ( left:deterministic_expr
+      '|'
+      right:(nondeterministic_expr / deterministic_expr)
+    ) {
       def to_ast
         Pattern::Either.new(left.to_ast, right.to_ast)
       end
@@ -28,16 +27,9 @@ grammar PatternGrammar
   end
 
   rule deterministic_expr
-    (first:modified_expr rest:deterministic_expr) {
-      def to_ast
-        Pattern::Sequence.new(
-          first.to_ast,
-          rest.to_ast,
-        )
-      end
-    }
-    /
-    (first:unmodified_expr rest:deterministic_expr) {
+    ( first:(modified_expr / unmodified_expr)
+      rest:deterministic_expr
+    ) {
       def to_ast
         Pattern::Sequence.new(
           first.to_ast,
@@ -60,12 +52,7 @@ grammar PatternGrammar
   end
 
   rule unmodified_expr
-    char:char {
-      def to_ast
-        char.to_ast
-      end
-    } /
-    group
+    char / group
   end
 
   rule modifier
