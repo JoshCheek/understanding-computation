@@ -24,6 +24,23 @@ module Pattern
       end
     end
 
+    specify 'escaped characters -> ExactMatch' do
+      parses! "\\(" , ExactMatch.new("(")
+      parses! "\\)" , ExactMatch.new(")")
+      parses! "\\[" , ExactMatch.new("[")
+      parses! "\\]" , ExactMatch.new("]")
+      parses! "\\{" , ExactMatch.new("{")
+      parses! "\\}" , ExactMatch.new("}")
+      parses! "\\a",  ExactMatch.new("\a")
+      parses! "\\b",  ExactMatch.new("\b")
+      parses! "\\e",  ExactMatch.new("\e")
+      parses! "\\f",  ExactMatch.new("\f")
+      parses! "\\n",  ExactMatch.new("\n")
+      parses! "\\r",  ExactMatch.new("\r")
+      parses! "\\t",  ExactMatch.new("\t")
+      parses! "\\v",  ExactMatch.new("\v")
+    end
+
     specify 'multiple characters -> Sequence of ExactMatch' do
       parses! "abcd", Sequence.new(
         ExactMatch.new("a"),

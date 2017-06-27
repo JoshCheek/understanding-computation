@@ -52,7 +52,7 @@ grammar PatternGrammar
   end
 
   rule unmodified_expr
-    char / group
+    terminal / group
   end
 
   rule modifier
@@ -71,14 +71,6 @@ grammar PatternGrammar
     }
   end
 
-  rule char
-    [a-zA-Z0-9] {
-      def to_ast
-        Pattern::ExactMatch.new(text_value)
-      end
-    }
-  end
-
   rule group
     '(' pattern ')' {
       def to_ast
@@ -86,8 +78,46 @@ grammar PatternGrammar
       end
     }
   end
+
+  rule terminal
+    escaped_char / char
+  end
+
+  rule escaped_char
+    ( '\\\\'
+      escaped:("[" / "]" / [abefnrtv(){}])
+    ) {
+      def to_ast
+        Pattern::ExactMatch.new(
+          case escaped.text_value
+          when ?a then 7.chr
+          when ?b then 8.chr
+          when ?t then 9.chr
+          when ?n then 10.chr
+          when ?v then 11.chr
+          when ?e then 27.chr
+          when ?f then 12.chr
+          when ?r then 13.chr
+          when "[", "]", "(", ")", "{", "}"
+            escaped.text_value
+          else
+            raise "wat: \#{text_value.inspect}"
+          end
+        )
+      end
+    }
+  end
+
+  rule char
+    [a-zA-Z0-9] {
+      def to_ast
+        Pattern::ExactMatch.new(text_value)
+      end
+    }
+  end
 end
 GRAMMAR
+
 
 module Pattern
   extend self
