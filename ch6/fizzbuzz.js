@@ -1,7 +1,12 @@
 // INTEROP (translates lambda calculus into JavaScript)
 
 // LAMBDA CALCULUS
-function fizzBuzz(i, max) {
+y = f =>
+  (builder => arg => f(builder(builder))(arg))
+  (builder => arg => f(builder(builder))(arg))
+
+
+y(recur => i => max => {
   if(i == max)
     return
   else if(i%15 == 0)
@@ -12,6 +17,5 @@ function fizzBuzz(i, max) {
     console.log('Buzz')
   else
     console.log(i)
-  fizzBuzz(i+1, max)
-}
-fizzBuzz(1, 100)
+  recur(i+1)(max)
+})(1)(100)
