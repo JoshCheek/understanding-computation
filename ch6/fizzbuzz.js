@@ -57,23 +57,19 @@ const ASSERT_EQUAL = (expected, actual) => {
                       (_=>PRINT('Buzz'))
                       (_=>PRINT(TO_I(i))))))
               (_=>recur(succ(i))(max))))))
-)(
-  // mod
+)(// mod
   y(recur => n1 => n2 =>
-    IF(lt(n1)(n2))(_=>n1)(_=>recur(sub(n1)(n2))(n2))
-  )
-))(
-  // lt
-  y(recur => nA => nB =>
-    isZero(sub(nB)(nA))(FALSE)(TRUE))
-))( // numEq
+    IF(lt(n1)(n2))
+      (_=>n1)
+      (_=>recur(sub(n1)(n2))(n2)))
+))(y(recur => nA => nB => isZero(sub(nB)(nA))(FALSE)(TRUE)) // lt
+))(// numEq
   nA => nB =>
     AND(isZero(sub(nA)(nB)))
        (isZero(sub(nB)(nA)))
-))( nA => nB => nB(pred)(nA) // sub
+))(nA => nB => nB(pred)(nA) // sub
 ))(n => n(_ => FALSE)(TRUE) // isZero
-))(
-  // pred
+))(// pred
   n => f => arg =>
     n(pair => pair(isFirst => value =>
         IF(isFirst)
@@ -83,8 +79,7 @@ const ASSERT_EQUAL = (expected, actual) => {
      (isFirst => value => value)
 ))(// DO
   y(recur => a => b => recur((_=>_=>_)(b(a(_=>_)))))
-))(
-  // y combinator
+))(// y combinator
   f =>
     (builder => arg => f(builder(builder))(arg))
     (builder => arg => f(builder(builder))(arg))
@@ -94,11 +89,11 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(trueCase => falseCase => falseCase                                // FALSE
 ))(trueCase => falseCase => trueCase                                 // TRUE
 ))((n30 => add(add(n5)(n5))(add(n30)(add(n30)(n30))))(add(n15)(n15)) // 100
-))(add(n5)(add(n5)(n5))          // 15
-))(succ(succ(n3))                // 5
-))(succ(succ(n1))                // 3
-))(succ(n0)                      // 1
-))(f => arg => arg               // 0
-))(nA => nB => f => arg => nA(f)(nB(f)(arg)) // add
-))(n => f => arg => n(f)(f(arg)) // succ
+))(add(n5)(add(n5)(n5))                                              // 15
+))(succ(succ(n3))                                                    // 5
+))(succ(succ(n1))                                                    // 3
+))(succ(n0)                                                          // 1
+))(f => arg => arg                                                   // 0
+))(nA => nB => f => arg => nA(f)(nB(f)(arg))                         // add
+))(n => f => arg => n(f)(f(arg))                                     // succ
 )
