@@ -17,20 +17,20 @@ const ASSERT_EQUAL = (expected, actual) => {
 (cons =>
 (y =>
 (pred => (isZero => (sub => (numEq => (lt => (mod =>
-  {
-  // y(recur => i => max => {
-  //   if(i == max)
-  //     return
-  //   else if(i%15 == 0)
-  //     PRINT('FizzBuzz')
-  //   else if(i%5 == 0)
-  //     PRINT('Fizz')
-  //   else if(i%3 == 0)
-  //     PRINT('Buzz')
-  //   else
-  //     PRINT(i)
-  //   recur(i+1)(max)
-  // })(1)(100);
+{
+  y(recur => i => max => {
+    if(TO_BOOL(numEq(i)(max)))
+      return
+    else if(TO_BOOL(isZero(mod(i)(n15))))
+      PRINT('FizzBuzz')
+    else if(TO_BOOL(isZero(mod(i)(n5))))
+      PRINT('Fizz')
+    else if(TO_BOOL(isZero(mod(i)(n3))))
+      PRINT('Buzz')
+    else
+      PRINT(TO_I(i))
+    recur(succ(i))(max)
+  })(n1)(n100);
 
   // tests
   ASSERT_EQUAL('a', IF(TRUE)(_=>'a')(_=>'b'))
