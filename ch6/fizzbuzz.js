@@ -2,6 +2,12 @@
 const PRINT   = toPrint => console.log(toPrint)
 const TO_I    = lambdaInt => lambdaInt(n => n + 1)(0)
 const TO_BOOL = lambdaBool => lambdaBool(true)(false)
+const ASSERT  = bool => { if(!bool) throw(`Expected ${bool} to be true`) }
+const ASSERT_EQUAL = (expected, actual) => {
+  if(expected !== actual)
+    throw(`Expected ${util.inspect(expected)} to === ${util.inspect(actual)}`)
+}
+
 ;
 
 // LAMBDA CALCULUS
@@ -24,18 +30,19 @@ const TO_BOOL = lambdaBool => lambdaBool(true)(false)
   //     PRINT(i)
   //   recur(i+1)(max)
   // })(1)(100);
+
+  // tests
+  ASSERT_EQUAL('a', IF(TRUE)(_=>'a')(_=>'b'))
+  ASSERT_EQUAL('b', IF(FALSE)(_=>'a')(_=>'b'))
   // console.log(TO_I(mod(n5)(n3)));
-  // console.log(IF(TRUE)(_=>'t!')(_=>'f!'))
-  // console.log(IF(FALSE)(_=>'t!')(_=>'f!'))
-  // console.log(TO_I(n100));
+  ASSERT(cons(true)(false)(a => b => a))
+  ASSERT(cons(false)(true)(a => b => b))
+  ASSERT_EQUAL(100, TO_I(n100));
+  ASSERT_EQUAL(4, pred(n5)(n => n + 1)(0))
   // console.log(TO_BOOL(lt(n3)(n3)));
   // console.log(TO_BOOL(lt(n5)(n5)));
   // console.log(TO_BOOL(lt(n3)(n5)));
   // console.log(TO_BOOL(lt(n5)(n3)));
-
-  // console.log(cons('a')('b')(a => b => a))
-  // console.log(cons('a')('b')(a => b => b))
-  // console.log(pred(n5)(n => n + 1)(0))
 })(
   // mod
   y(recur => n1 => n2 =>
