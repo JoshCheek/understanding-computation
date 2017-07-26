@@ -3,6 +3,7 @@ const PRINT   = toPrint => console.log(toPrint)
 const TO_I    = lambdaInt => lambdaInt(n => n + 1)(0)
 const TO_BOOL = lambdaBool => lambdaBool(true)(false)
 const ASSERT  = bool => { if(!bool) throw(`Expected ${bool} to be true`) }
+const REFUTE  = bool => { if(bool) throw(`Expected ${bool} to be false`) }
 const ASSERT_EQUAL = (expected, actual) => {
   if(expected !== actual)
     throw(`Expected ${util.inspect(expected)} to === ${util.inspect(actual)}`)
@@ -12,10 +13,10 @@ const ASSERT_EQUAL = (expected, actual) => {
 
 // LAMBDA CALCULUS
 (succ => (add => (n0 => (n1 => (n3 => (n5 => (n15 => (n100 =>
-(TRUE => (FALSE => (IF =>
+(TRUE => (FALSE => (IF => (AND =>
 (cons =>
 (y =>
-(pred => (sub => (lt => (mod =>
+(pred => (isZero => (numEq => (sub => (lt => (mod =>
   {
   // y(recur => i => max => {
   //   if(i == max)
@@ -39,6 +40,16 @@ const ASSERT_EQUAL = (expected, actual) => {
   ASSERT(cons(false)(true)(a => b => b))
   ASSERT_EQUAL(100, TO_I(n100));
   ASSERT_EQUAL(4, pred(n5)(n => n + 1)(0))
+  ASSERT_EQUAL(10, TO_I(sub(n15)(n5)))
+  ASSERT(TO_BOOL(AND(TRUE)(TRUE)))
+  REFUTE(TO_BOOL(AND(TRUE)(FALSE)))
+  REFUTE(TO_BOOL(AND(FALSE)(TRUE)))
+  REFUTE(TO_BOOL(AND(FALSE)(FALSE)))
+  ASSERT(TO_BOOL(numEq(n0)(n0)))
+  REFUTE(TO_BOOL(numEq(n1)(n0)))
+  REFUTE(TO_BOOL(numEq(n0)(n1)))
+  ASSERT(TO_BOOL(numEq(n5)(n5)))
+  REFUTE(TO_BOOL(numEq(n3)(n1)))
   // console.log(TO_BOOL(lt(n3)(n3)));
   // console.log(TO_BOOL(lt(n5)(n5)));
   // console.log(TO_BOOL(lt(n3)(n5)));
@@ -56,7 +67,18 @@ const ASSERT_EQUAL = (expected, actual) => {
   )(
     _=>IF(numEq(n0)(nB))(FALSE)(recur(pred(nA))(pred(nB)))
   ))
-))( 'FIXME' // sub
+))( nA => nB => nB(pred)(nA) // sub
+))( // numEq
+  y(recur =>
+    nA => nB =>
+      IF(AND(isZero(nA))(isZero(nB)))
+        (_=>TRUE)
+        (_=>IF(isZero(nA))
+              (_=>FALSE)
+              (_=>IF(isZero(nB))
+                    (_=>FALSE)
+                    (_=>recur(pred(nA))(pred(nB))))))
+))(n => n(_ => FALSE)(TRUE) // isZero
 ))(
   // pred
   n => f => arg =>
@@ -72,6 +94,7 @@ const ASSERT_EQUAL = (expected, actual) => {
     (builder => arg => f(builder(builder))(arg))
     (builder => arg => f(builder(builder))(arg))
 ))(a => b => f => f(a)(b) // cons
+))(a => b => a(b)(a)                                                 // AND
 ))(bool => trueCase => falseCase => bool(trueCase)(falseCase)(_=>_)  // IF
 ))(trueCase => falseCase => falseCase                                // FALSE
 ))(trueCase => falseCase => trueCase                                 // TRUE
