@@ -15,8 +15,8 @@ const ASSERT_EQUAL = (expected, actual) => {
 // LAMBDA CALCULUS
 (succ => (add => (n0 => (n1 => (n3 => (n5 => (n15 => (n100 =>
 (TRUE => (FALSE => (IF => (AND =>
-(cons =>
 (y => (DO =>
+(cons => (head => (tail => (isEmpty => (nil => (count =>
 (pred => (isZero => (sub => (numEq => (lt => (mod =>
   DO // TESTS
     (_=>ASSERT_EQUAL('a', IF(TRUE)(_=>'a')(_=>'b')))
@@ -24,8 +24,6 @@ const ASSERT_EQUAL = (expected, actual) => {
     (_=>ASSERT_EQUAL(2, TO_I(mod(n5)(n3))))
     (_=>ASSERT_EQUAL(3, TO_I(mod(n3)(n5))))
     (_=>ASSERT_EQUAL(10, TO_I(mod(n100)(n15))))
-    (_=>ASSERT(cons(true)(false)(a => b => a)))
-    (_=>ASSERT(cons(false)(true)(a => b => b)))
     (_=>ASSERT_EQUAL(100, TO_I(n100)))
     (_=>ASSERT_EQUAL(4, pred(n5)(n => n + 1)(0)))
     (_=>ASSERT_EQUAL(10, TO_I(sub(n15)(n5))))
@@ -42,6 +40,10 @@ const ASSERT_EQUAL = (expected, actual) => {
     (_=>REFUTE(TO_BOOL(lt(n5)(n5))))
     (_=>ASSERT(TO_BOOL(lt(n3)(n5))))
     (_=>REFUTE(TO_BOOL(lt(n5)(n3))))
+    (_=>ASSERT_EQUAL('a', head(cons('a')(cons('b')(cons('c')(nil))))))
+    (_=>ASSERT_EQUAL('b', head(tail(cons('a')(cons('b')(cons('c')(nil)))))))
+    (_=>ASSERT_EQUAL('c', head(tail(tail(cons('a')(cons('b')(cons('c')(nil))))))))
+    (_=>ASSERT_EQUAL(3, TO_I(count(cons('a')(cons('b')(cons('c')(nil)))))))
     // FIZZ BUZZ
     (_=>(fizzbuzz => fizzbuzz(n1)(n100))
         (y(recur => i => max =>
@@ -71,19 +73,28 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(n => n(_ => FALSE)(TRUE) // isZero
 ))(// pred
   n => f => arg =>
-    n(pair => pair(isFirst => value =>
+    n(pair => pair(isFirst => value => _empty =>
         IF(isFirst)
           (_=>cons(FALSE)(value))
           (_=>cons(FALSE)(f(value)))))
      (cons(TRUE)(arg))
-     (isFirst => value => value)
-))(// DO
-  y(recur => a => b => recur((_=>_=>_)(b(a(_=>_)))))
-))(// y combinator
+     (isFirst => value => _empty => value)
+))(// count
+  y(recur =>
+    list =>
+      IF(isEmpty(list))
+        (_=>n0)
+        (_=>succ(recur(tail(list)))))
+))(f => f(_=>_)(_=>_)(TRUE)                                          // nil
+))(list => list(head => tail => empty => empty)                      // isempty
+))(list => list(head => tail => empty => tail)                       // tail
+))(list => list(head => tail => empty => head)                       // head
+))(a => b => f => f(a)(b)(FALSE)                                     // cons
+))(y(recur => a => b => recur((_=>_=>_)(b(a(_=>_)))))                // DO
+))(// Y combinator
   f =>
     (builder => arg => f(builder(builder))(arg))
     (builder => arg => f(builder(builder))(arg))
-))(a => b => f => f(a)(b)                                            // cons
 ))(a => b => a(b)(a)                                                 // AND
 ))(bool => trueCase => falseCase => bool(trueCase)(falseCase)(_=>_)  // IF
 ))(trueCase => falseCase => falseCase                                // FALSE
