@@ -16,7 +16,7 @@ const ASSERT_EQUAL = (expected, actual) => {
 (TRUE => (FALSE => (IF => (AND =>
 (cons =>
 (y =>
-(pred => (isZero => (numEq => (sub => (lt => (mod =>
+(pred => (isZero => (sub => (numEq => (lt => (mod =>
   {
   // y(recur => i => max => {
   //   if(i == max)
@@ -35,7 +35,9 @@ const ASSERT_EQUAL = (expected, actual) => {
   // tests
   ASSERT_EQUAL('a', IF(TRUE)(_=>'a')(_=>'b'))
   ASSERT_EQUAL('b', IF(FALSE)(_=>'a')(_=>'b'))
-  // console.log(TO_I(mod(n5)(n3)));
+  ASSERT_EQUAL(2, TO_I(mod(n5)(n3)));
+  ASSERT_EQUAL(3, TO_I(mod(n3)(n5)));
+  ASSERT_EQUAL(10, TO_I(mod(n100)(n15)));
   ASSERT(cons(true)(false)(a => b => a))
   ASSERT(cons(false)(true)(a => b => b))
   ASSERT_EQUAL(100, TO_I(n100));
@@ -50,10 +52,10 @@ const ASSERT_EQUAL = (expected, actual) => {
   REFUTE(TO_BOOL(numEq(n0)(n1)))
   ASSERT(TO_BOOL(numEq(n5)(n5)))
   REFUTE(TO_BOOL(numEq(n3)(n1)))
-  // console.log(TO_BOOL(lt(n3)(n3)));
-  // console.log(TO_BOOL(lt(n5)(n5)));
-  // console.log(TO_BOOL(lt(n3)(n5)));
-  // console.log(TO_BOOL(lt(n5)(n3)));
+  REFUTE(TO_BOOL(lt(n3)(n3)))
+  REFUTE(TO_BOOL(lt(n5)(n5)))
+  ASSERT(TO_BOOL(lt(n3)(n5)))
+  REFUTE(TO_BOOL(lt(n5)(n3)))
 })(
   // mod
   y(recur => n1 => n2 =>
@@ -62,22 +64,12 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(
   // lt
   y(recur => nA => nB =>
-  IF(numEq(n0)(nA))(
-    _=>IF(numEq(n0)(nB))(FALSE)(TRUE)
-  )(
-    _=>IF(numEq(n0)(nB))(FALSE)(recur(pred(nA))(pred(nB)))
-  ))
-))( nA => nB => nB(pred)(nA) // sub
+    isZero(sub(nB)(nA))(FALSE)(TRUE))
 ))( // numEq
-  y(recur =>
-    nA => nB =>
-      IF(AND(isZero(nA))(isZero(nB)))
-        (_=>TRUE)
-        (_=>IF(isZero(nA))
-              (_=>FALSE)
-              (_=>IF(isZero(nB))
-                    (_=>FALSE)
-                    (_=>recur(pred(nA))(pred(nB))))))
+  nA => nB =>
+    AND(isZero(sub(nA)(nB)))
+       (isZero(sub(nB)(nA)))
+))( nA => nB => nB(pred)(nA) // sub
 ))(n => n(_ => FALSE)(TRUE) // isZero
 ))(
   // pred
