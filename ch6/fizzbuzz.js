@@ -27,12 +27,14 @@ const ASSERT_EQUAL = (expected, actual) => {
 (succ => (add =>
 (n0 => (n1 => (n2 => (n3 => (n4 => (n5 => (n6 => (n7 => (n8 => (n9 => (n10 =>
 (n15 => (n30 => (n60 => (n100 =>
+(_0 => (_1 => (_2 => (_3 => (_4 => (_5 => (_6 => (_7 => (_8 => (_9 =>
 (_B => (_F => (_i => (_u => (_z =>
 (TRUE => (FALSE => (IF => (AND =>
 (y => (DO =>
-(cons => (head => (tail => (isEmpty => (nil => (count => (map =>
-(pred => (isZero => (sub => (numEq => (lt => (mod =>
-(str =>
+(cons => (head => (tail => (isEmpty => (nil => (count => (map => (reduce => (reverse =>
+(pred => (isZero => (sub => (numEq => (lt => (mod => (div =>
+(intToStr => (str =>
+
   DO // TESTS
     (_=>ASSERT_EQUAL('a', IF(TRUE)(_=>'a')(_=>'b')))
     (_=>ASSERT_EQUAL('b', IF(FALSE)(_=>'a')(_=>'b')))
@@ -62,10 +64,17 @@ const ASSERT_EQUAL = (expected, actual) => {
     (_=>ASSERT_EQUAL(3, TO_I(count(cons('a')(cons('b')(cons('c')(nil)))))))
     (_=>ASSERT_EQUAL('abc', TO_ARY(cons('a')(cons('b')(cons('c')(nil)))).join('')))
     (_=>ASSERT_EQUAL('ABC', TO_ARY(map(chr => chr.toUpperCase())(cons('a')(cons('b')(cons('c')(nil))))).join('')))
+    (_=>ASSERT_EQUAL('dcba', TO_ARY(reverse(cons('a')(cons('b')(cons('c')(cons('d')(nil)))))).join('')))
     (_=>ASSERT_EQUAL('F', TO_CHR(_F)))
     (_=>ASSERT_EQUAL('', TO_ARY(map(TO_CHR)(str(n0))).join('')))
     (_=>ASSERT_EQUAL(4, TO_I(count(str(_F)(_i)(_z)(_z)(n0)))))
     (_=>ASSERT_EQUAL('Fizz', TO_ARY(map(TO_CHR)(str(_F)(_i)(_z)(_z)(n0))).join('')))
+    (_=>ASSERT_EQUAL('zziF', TO_ARY(map(TO_CHR)(reverse(str(_F)(_i)(_z)(_z)(n0)))).join('')))
+    (_=>ASSERT_EQUAL(20, TO_I(div(n100)(n5))))
+    (_=>ASSERT_EQUAL(3, TO_I(div(_i)(n30))))
+    (_=>ASSERT_EQUAL('30', TO_ARY(map(TO_CHR)(intToStr(n30))).join('')))
+    (_=>ASSERT_EQUAL('105', TO_ARY(map(TO_CHR)(intToStr(_i))).join('')))
+
     // FIZZ BUZZ
     (_=>(fizzbuzz => fizzbuzz(n1)(n100))
         (y(recur => i => max =>
@@ -79,8 +88,7 @@ const ASSERT_EQUAL = (expected, actual) => {
                     (_=>PUTS(str(_F)(_i)(_z)(_z)(n0)))
                     (_=>IF(isZero(mod(i)(n3)))
                       (_=>PUTS(str(_B)(_u)(_z)(_z)(n0)))
-                      (_=>PUTS(str(_z)(_z)(_z)(n0))))))
-                      // (_=>PUTS(TO_I(i))))))
+                      (_=>PUTS(intToStr(i))))))
               (_=>recur(succ(i))(max))))))
 )(// str
   (getRest => maybeChr =>
@@ -91,6 +99,29 @@ const ASSERT_EQUAL = (expected, actual) => {
     IF(isZero(maybeChr))
       (_=>cb(nil))
       (_=>recur(rest => cb(cons(maybeChr)(rest))))))
+))(// intToStr
+  (digitToChar => (intToStrReverse =>
+    n => reverse(intToStrReverse(n))
+  )((y(recur => n =>
+       IF(lt(n)(n10))
+         (_=>cons(digitToChar(n))(nil))
+         (_=>cons(digitToChar(mod(n)(n10)))(recur(div(n)(n10)))))))
+  )(digit =>
+    IF(numEq(n0)(digit))(_=>_0)
+    (_=>IF(numEq(n1)(digit))(_=>_1)
+    (_=>IF(numEq(n2)(digit))(_=>_2)
+    (_=>IF(numEq(n3)(digit))(_=>_3)
+    (_=>IF(numEq(n4)(digit))(_=>_4)
+    (_=>IF(numEq(n5)(digit))(_=>_5)
+    (_=>IF(numEq(n6)(digit))(_=>_6)
+    (_=>IF(numEq(n7)(digit))(_=>_7)
+    (_=>IF(numEq(n8)(digit))(_=>_8)
+                            (_=>_9))))))))))
+))(// div
+  y(recur => n1 => n2 =>
+    IF(lt(n1)(n2))
+      (_=>n0)
+      (_=>succ(recur(sub(n1)(n2))(n2))))
 ))(// mod
   y(recur => n1 => n2 =>
     IF(lt(n1)(n2))
@@ -111,6 +142,17 @@ const ASSERT_EQUAL = (expected, actual) => {
           (_=>cons(FALSE)(f(value)))))
      (cons(TRUE)(arg))
      (isFirst => value => _empty => value)
+))(// reverse
+  y(recur => list =>
+    reduce(newList => head => cons(head)(newList))(list)(nil))
+))(// reduce
+  y(recur =>
+    f => list => memo =>
+      IF(isEmpty(list))
+        (_=>memo)
+        (_=>recur(f)
+                 (tail(list))
+                 (f(memo)(head(list)))))
 ))(// map
   y(recur =>
     f => list =>
@@ -143,6 +185,16 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(add(n100)(n5)                                                     // _i (105)
 ))(add(n60)(n10)                                                     // _F (70)
 ))(add(n60)(n6)                                                      // _B (66)
+))(succ(_8)                                                          // _9 (57)
+))(succ(_7)                                                          // _8 (56)
+))(succ(_6)                                                          // _7 (55)
+))(succ(_5)                                                          // _6 (54)
+))(succ(_4)                                                          // _5 (53)
+))(succ(_3)                                                          // _4 (52)
+))(succ(_2)                                                          // _3 (51)
+))(succ(_1)                                                          // _2 (50)
+))(succ(_0)                                                          // _1 (49)
+))(add(add(n30)(n15))(n3)                                            // _0 (48)
 ))(add(n10)(add(n30)(n60))                                           // 100
 ))(add(n30)(n30)                                                     // 60
 ))(add(n15)(n15)                                                     // 30
