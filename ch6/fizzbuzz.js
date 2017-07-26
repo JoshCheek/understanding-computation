@@ -2,6 +2,9 @@
 const PRINT   = toPrint => console.log(toPrint)
 const TO_I    = lambdaInt => lambdaInt(n => n + 1)(0)
 const TO_BOOL = lambdaBool => lambdaBool(true)(false)
+
+// TEST ASSERTIONS
+const util    = require('util')
 const ASSERT  = bool => { if(!bool) throw(`Expected ${bool} to be true`) }
 const REFUTE  = bool => { if(bool) throw(`Expected ${bool} to be false`) }
 const ASSERT_EQUAL = (expected, actual) => {
@@ -9,28 +12,27 @@ const ASSERT_EQUAL = (expected, actual) => {
     throw(`Expected ${util.inspect(expected)} to === ${util.inspect(actual)}`)
 }
 
-;
-
 // LAMBDA CALCULUS
 (succ => (add => (n0 => (n1 => (n3 => (n5 => (n15 => (n100 =>
 (TRUE => (FALSE => (IF => (AND =>
 (cons =>
-(y =>
+(DO => (y =>
 (pred => (isZero => (sub => (numEq => (lt => (mod =>
 {
-  y(recur => i => max => {
-    if(TO_BOOL(numEq(i)(max)))
-      return
-    else if(TO_BOOL(isZero(mod(i)(n15))))
-      PRINT('FizzBuzz')
-    else if(TO_BOOL(isZero(mod(i)(n5))))
-      PRINT('Fizz')
-    else if(TO_BOOL(isZero(mod(i)(n3))))
-      PRINT('Buzz')
-    else
-      PRINT(TO_I(i))
-    recur(succ(i))(max)
-  })(n1)(n100);
+  y(recur => i => max =>
+    IF(numEq(i)(max))
+      (_=>_) // base case
+      (_=>
+        DO(_=>
+          IF(isZero(mod(i)(n15)))
+            (_=>PRINT('FizzBuzz'))
+            (_=>IF(isZero(mod(i)(n5)))
+              (_=>PRINT('Fizz'))
+              (_=>IF(isZero(mod(i)(n3)))
+                (_=>PRINT('Buzz'))
+                (_=>PRINT(TO_I(i))))))
+          (_=>recur(succ(i))(max))))
+  (n1)(n100)
 
   // tests
   ASSERT_EQUAL('a', IF(TRUE)(_=>'a')(_=>'b'))
@@ -85,7 +87,8 @@ const ASSERT_EQUAL = (expected, actual) => {
   f =>
     (builder => arg => f(builder(builder))(arg))
     (builder => arg => f(builder(builder))(arg))
-))(a => b => f => f(a)(b) // cons
+))(a => b => b(a(_=>_))                                              // DO
+))(a => b => f => f(a)(b)                                            // cons
 ))(a => b => a(b)(a)                                                 // AND
 ))(bool => trueCase => falseCase => bool(trueCase)(falseCase)(_=>_)  // IF
 ))(trueCase => falseCase => falseCase                                // FALSE
