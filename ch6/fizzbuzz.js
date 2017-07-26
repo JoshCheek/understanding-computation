@@ -24,14 +24,14 @@ const ASSERT_EQUAL = (expected, actual) => {
 }
 
 // LAMBDA CALCULUS
-(succ => (add =>
+(compose => (succ => (add =>
 (n0 => (n1 => (n2 => (n3 => (n4 => (n5 => (n6 => (n7 => (n8 => (n9 => (n10 =>
 (n15 => (n30 => (n60 => (n100 =>
 (_0 => (_1 => (_2 => (_3 => (_4 => (_5 => (_6 => (_7 => (_8 => (_9 =>
 (_B => (_F => (_i => (_u => (_z =>
 (TRUE => (FALSE => (IF => (AND =>
 (y => (DO =>
-(cons => (head => (tail => (isEmpty => (nil => (count => (map => (reduce => (reverse =>
+(cons => (head => (tail => (isEmpty => (nil => (map => (reduce => (count => (reverse =>
 (pred => (isZero => (sub => (numEq => (lt => (mod => (div =>
 (intToStr => (str =>
 
@@ -101,7 +101,7 @@ const ASSERT_EQUAL = (expected, actual) => {
       (_=>recur(rest => cb(cons(maybeChr)(rest))))))
 ))(// intToStr
   (digitToChar => (intToStrReverse =>
-    n => reverse(intToStrReverse(n))
+    compose(intToStrReverse)(reverse)
   )((y(recur => n =>
        IF(lt(n)(n10))
          (_=>cons(digitToChar(n))(nil))
@@ -145,6 +145,7 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(// reverse
   y(recur => list =>
     reduce(newList => head => cons(head)(newList))(list)(nil))
+))(list => reduce(n=>_e=>succ(n))(list)(n0)                          // count
 ))(// reduce
   y(recur =>
     f => list => memo =>
@@ -160,17 +161,11 @@ const ASSERT_EQUAL = (expected, actual) => {
         (_=>nil)
         (_=>cons(f(head(list)))
                 (recur(f)(tail(list)))))
-))(// count
-  y(recur =>
-    list =>
-      IF(isEmpty(list))
-        (_=>n0)
-        (_=>succ(recur(tail(list)))))
 ))(f => f(_=>_)(_=>_)(TRUE)                                          // nil
 ))(list => list(head => tail => empty => empty)                      // isempty
 ))(list => list(head => tail => empty => tail)                       // tail
 ))(list => list(head => tail => empty => head)                       // head
-))(a => b => f => f(a)(b)(FALSE)                                     // cons
+))(head => tail => chooser => chooser(head)(tail)(FALSE)             // cons
 ))(y(recur => a => b => recur((_=>_=>_)(b(a(_=>_)))))                // DO
 ))(// Y combinator
   f =>
@@ -212,4 +207,5 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(f => arg => arg                                                   // 0
 ))(nA => nB => f => arg => nA(f)(nB(f)(arg))                         // add
 ))(n => f => arg => n(f)(f(arg))                                     // succ
+))(f1 => f2 => arg => f2(f1(arg))                                    // compose
 )
