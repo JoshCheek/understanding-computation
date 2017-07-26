@@ -13,7 +13,8 @@ const ASSERT_EQUAL = (expected, actual) => {
 }
 
 // LAMBDA CALCULUS
-(succ => (add => (n0 => (n1 => (n3 => (n5 => (n15 => (n100 =>
+(succ => (add => (n0 => (n1 => (n3 => (n5 => (n10 => (n15 => (n30 => (n60 => (n100 =>
+(_B => (_F => (_i => (_u => (_z =>
 (TRUE => (FALSE => (IF => (AND =>
 (y => (DO =>
 (cons => (head => (tail => (isEmpty => (nil => (count =>
@@ -27,6 +28,7 @@ const ASSERT_EQUAL = (expected, actual) => {
     (_=>ASSERT_EQUAL(100, TO_I(n100)))
     (_=>ASSERT_EQUAL(4, pred(n5)(n => n + 1)(0)))
     (_=>ASSERT_EQUAL(10, TO_I(sub(n15)(n5))))
+    (_=>ASSERT_EQUAL(122, TO_I(_z)))
     (_=>ASSERT(TO_BOOL(AND(TRUE)(TRUE))))
     (_=>REFUTE(TO_BOOL(AND(TRUE)(FALSE))))
     (_=>REFUTE(TO_BOOL(AND(FALSE)(TRUE))))
@@ -99,8 +101,16 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(bool => trueCase => falseCase => bool(trueCase)(falseCase)(_=>_)  // IF
 ))(trueCase => falseCase => falseCase                                // FALSE
 ))(trueCase => falseCase => trueCase                                 // TRUE
-))((n30 => add(add(n5)(n5))(add(n30)(add(n30)(n30))))(add(n15)(n15)) // 100
-))(add(n5)(add(n5)(n5))                                              // 15
+))(add(_u)(n5)                                                       // _z (122)
+))(add(add(n100)(n15))(add(n1)(n1))                                  // _u (117)
+))(add(n100)(n5)                                                     // _i (105)
+))(add(n60)(n10)                                                     // _F (70)
+))(add(add(n60)(n5))(n1)                                             // _B (66)
+))(add(n10)(add(n30)(n60))                                           // 100
+))(add(n30)(n30)                                                     // 60
+))(add(n15)(n15)                                                     // 30
+))(add(n5)(n10)                                                      // 15
+))(add(n5)(n5)                                                       // 10
 ))(succ(succ(n3))                                                    // 5
 ))(succ(succ(n1))                                                    // 3
 ))(succ(n0)                                                          // 1
