@@ -1,7 +1,18 @@
 // INTEROP (translates lambda calculus into JavaScript)
-const PRINT   = toPrint => console.log(toPrint)
-const TO_I    = lambdaInt => lambdaInt(n => n + 1)(0)
+const PUTS    = str => console.log(TO_ARY(str).map(TO_CHR).join(''))
+const TO_I    = lambdaInt  => lambdaInt(n => n + 1)(0)
 const TO_BOOL = lambdaBool => lambdaBool(true)(false)
+const TO_CHR  = lambdaChar => String.fromCharCode(TO_I(lambdaChar))
+const TO_ARY  = lambdaList => {
+  let ary = []
+  while(lambdaList(_ => _ => empty => !TO_BOOL(empty))) {
+    ary.push(lambdaList(head => _ => _ => head))
+    lambdaList = lambdaList(_ => tail => _ => tail)
+  }
+  return ary
+}
+// const TO_STRING = lambdaStr  =>
+//   map(lambdaStr)(chr => TO_I(chr))
 
 // TEST ASSERTIONS
 const util    = require('util')
@@ -13,12 +24,15 @@ const ASSERT_EQUAL = (expected, actual) => {
 }
 
 // LAMBDA CALCULUS
-(succ => (add => (n0 => (n1 => (n3 => (n5 => (n10 => (n15 => (n30 => (n60 => (n100 =>
+(succ => (add =>
+(n0 => (n1 => (n2 => (n3 => (n4 => (n5 => (n6 => (n7 => (n8 => (n9 => (n10 =>
+(n15 => (n30 => (n60 => (n100 =>
 (_B => (_F => (_i => (_u => (_z =>
 (TRUE => (FALSE => (IF => (AND =>
 (y => (DO =>
-(cons => (head => (tail => (isEmpty => (nil => (count =>
+(cons => (head => (tail => (isEmpty => (nil => (count => (map =>
 (pred => (isZero => (sub => (numEq => (lt => (mod =>
+(str =>
   DO // TESTS
     (_=>ASSERT_EQUAL('a', IF(TRUE)(_=>'a')(_=>'b')))
     (_=>ASSERT_EQUAL('b', IF(FALSE)(_=>'a')(_=>'b')))
@@ -46,6 +60,12 @@ const ASSERT_EQUAL = (expected, actual) => {
     (_=>ASSERT_EQUAL('b', head(tail(cons('a')(cons('b')(cons('c')(nil)))))))
     (_=>ASSERT_EQUAL('c', head(tail(tail(cons('a')(cons('b')(cons('c')(nil))))))))
     (_=>ASSERT_EQUAL(3, TO_I(count(cons('a')(cons('b')(cons('c')(nil)))))))
+    (_=>ASSERT_EQUAL('abc', TO_ARY(cons('a')(cons('b')(cons('c')(nil)))).join('')))
+    (_=>ASSERT_EQUAL('ABC', TO_ARY(map(chr => chr.toUpperCase())(cons('a')(cons('b')(cons('c')(nil))))).join('')))
+    (_=>ASSERT_EQUAL('F', TO_CHR(_F)))
+    (_=>ASSERT_EQUAL('', TO_ARY(map(TO_CHR)(str(n0))).join('')))
+    (_=>ASSERT_EQUAL(4, TO_I(count(str(_F)(_i)(_z)(_z)(n0)))))
+    (_=>ASSERT_EQUAL('Fizz', TO_ARY(map(TO_CHR)(str(_F)(_i)(_z)(_z)(n0))).join('')))
     // FIZZ BUZZ
     (_=>(fizzbuzz => fizzbuzz(n1)(n100))
         (y(recur => i => max =>
@@ -54,14 +74,24 @@ const ASSERT_EQUAL = (expected, actual) => {
             (_=>
               DO(_=>
                 IF(isZero(mod(i)(n15)))
-                  (_=>PRINT('FizzBuzz'))
+                (_=>PUTS(str(_F)(_i)(_z)(_z)(_B)(_u)(_z)(_z)(n0)))
                   (_=>IF(isZero(mod(i)(n5)))
-                    (_=>PRINT('Fizz'))
+                    (_=>PUTS(str(_F)(_i)(_z)(_z)(n0)))
                     (_=>IF(isZero(mod(i)(n3)))
-                      (_=>PRINT('Buzz'))
-                      (_=>PRINT(TO_I(i))))))
+                      (_=>PUTS(str(_B)(_u)(_z)(_z)(n0)))
+                      (_=>PUTS(str(_z)(_z)(_z)(n0))))))
+                      // (_=>PUTS(TO_I(i))))))
               (_=>recur(succ(i))(max))))))
-)(// mod
+)(// str
+  (getRest => maybeChr =>
+    IF(isZero(maybeChr))
+      (_=>nil)
+      (_=>getRest(rest => cons(maybeChr)(rest)))
+  )(y(recur => cb => maybeChr =>
+    IF(isZero(maybeChr))
+      (_=>cb(nil))
+      (_=>recur(rest => cb(cons(maybeChr)(rest))))))
+))(// mod
   y(recur => n1 => n2 =>
     IF(lt(n1)(n2))
       (_=>n1)
@@ -81,6 +111,13 @@ const ASSERT_EQUAL = (expected, actual) => {
           (_=>cons(FALSE)(f(value)))))
      (cons(TRUE)(arg))
      (isFirst => value => _empty => value)
+))(// map
+  y(recur =>
+    f => list =>
+      IF(isEmpty(list))
+        (_=>nil)
+        (_=>cons(f(head(list)))
+                (recur(f)(tail(list)))))
 ))(// count
   y(recur =>
     list =>
@@ -102,17 +139,23 @@ const ASSERT_EQUAL = (expected, actual) => {
 ))(trueCase => falseCase => falseCase                                // FALSE
 ))(trueCase => falseCase => trueCase                                 // TRUE
 ))(add(_u)(n5)                                                       // _z (122)
-))(add(add(n100)(n15))(add(n1)(n1))                                  // _u (117)
+))(add(add(n100)(n15))(n2)                                           // _u (117)
 ))(add(n100)(n5)                                                     // _i (105)
 ))(add(n60)(n10)                                                     // _F (70)
-))(add(add(n60)(n5))(n1)                                             // _B (66)
+))(add(n60)(n6)                                                      // _B (66)
 ))(add(n10)(add(n30)(n60))                                           // 100
 ))(add(n30)(n30)                                                     // 60
 ))(add(n15)(n15)                                                     // 30
 ))(add(n5)(n10)                                                      // 15
-))(add(n5)(n5)                                                       // 10
-))(succ(succ(n3))                                                    // 5
-))(succ(succ(n1))                                                    // 3
+))(succ(n9)                                                          // 10
+))(succ(n8)                                                          // 9
+))(succ(n7)                                                          // 8
+))(succ(n6)                                                          // 7
+))(succ(n5)                                                          // 6
+))(succ(n4)                                                          // 5
+))(succ(n3)                                                          // 4
+))(succ(n2)                                                          // 3
+))(succ(n1)                                                          // 2
 ))(succ(n0)                                                          // 1
 ))(f => arg => arg                                                   // 0
 ))(nA => nB => f => arg => nA(f)(nB(f)(arg))                         // add
